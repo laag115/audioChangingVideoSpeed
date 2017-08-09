@@ -24,11 +24,9 @@ public:
 
     int bufferCounter;
     vector <float> left;
-    // float curVol;
+    vector <float> right;
     float smoothedVol;
     float scaledVol;
-    // int numCounted;
-    float audioDebug;
 
     ofSoundStream soundStream;
     ofVideoPlayer video;

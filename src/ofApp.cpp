@@ -5,15 +5,14 @@ void ofApp::setup(){
     // initialize soundStream
     soundStream.printDeviceList();
     int outChannels = 0;
-    int inChannels = 1;
+    int inChannels = 2;
     int sampleRate = 44100;
     int bufferSize = 256;
     int nBuffers = 4;
     left.assign(bufferSize, 0.0);
+    right.assign(bufferSize, 0.0);
+
     soundStream.setup(this, outChannels, inChannels, sampleRate, bufferSize, nBuffers);
-
-
-    audioDebug = 0.0;
 
     // initialize volume variables
     bufferCounter = 0;
@@ -30,17 +29,16 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
     video.update();
-    scaledVol = ofMap(smoothedVol, 0.0, 0.17, 0.0, 1.0, true);
+    scaledVol = ofMap(smoothedVol, 0.0, 0.10, 0.0, .20, true);
+    if (scaledVol > .15)
+        video.setSpeed(1.0-scaledVol);
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    // video.draw(0,0, ofGetWidth(), ofGetHeight());
-    ofSetColor(255,0,0);
-    ofDrawCircle(300, 300, 300);
+    video.draw(0,0, ofGetWidth(), ofGetHeight());
     ofDrawBitmapString("scaledvol: " + ofToString(scaledVol), 32, 32);
-    // why is smoothed vol inf?
-    ofDrawBitmapString("\n\n debugf: " + ofToString(audioDebug), 32, 32);
+
 }
 
 void ofApp::audioIn(float* input, int bufferSize, int nChannels){
@@ -52,11 +50,10 @@ void ofApp::audioIn(float* input, int bufferSize, int nChannels){
 
     //lets go through each sample and calculate the root mean square which is a rough way to calculate volume
     for (int i = 0; i < bufferSize; i++){
-        audioDebug = left[i];
         left[i] = input[i*2]*0.5;
-        // right[i] = input[i*2+1];
+        right[i] = input[i*2+1];
         curVol += left[i] * left[i];
-        //curVol += right[i] * right[i];
+        curVol += right[i] * right[i];
         numCounted+=2;
     }
 
